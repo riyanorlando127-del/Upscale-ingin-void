@@ -122,7 +122,7 @@ upscaleBtn.addEventListener("click", async () => {
 
     try{
 
-        const response = await fetch("api.php",{
+        const response = await fetch("/api/upscale",{
 
             method:"POST",
 
