@@ -1,185 +1,77 @@
-// =========================
-// Rinvoid Upscaler
-// script.js
-// =========================
-
-const dropArea = document.getElementById("dropArea");
-const uploadBtn = document.getElementById("uploadBtn");
-const imageInput = document.getElementById("imageInput");
-
-const previewImage = document.getElementById("previewImage");
-const resultImage = document.getElementById("resultImage");
-
-const upscaleBtn = document.getElementById("upscaleBtn");
-
-const scale = document.getElementById("scale");
-const model = document.getElementById("model");
-const face = document.getElementById("face");
-
-let selectedFile = null;
-
-// =========================
-// Upload Button
-// =========================
-
-uploadBtn.addEventListener("click", () => {
-    imageInput.click();
-});
-
-// =========================
-// Input File
-// =========================
-
-imageInput.addEventListener("change", () => {
-
-    if (!imageInput.files.length) return;
-
-    selectedFile = imageInput.files[0];
-
-    preview();
-
-});
-
-// =========================
-// Drag & Drop
-// =========================
-
-dropArea.addEventListener("dragover", (e) => {
-
-    e.preventDefault();
-
-    dropArea.style.borderColor = "#8f5fff";
-
-});
-
-dropArea.addEventListener("dragleave", () => {
-
-    dropArea.style.borderColor = "";
-
-});
-
-dropArea.addEventListener("drop", (e) => {
-
-    e.preventDefault();
-
-    dropArea.style.borderColor = "";
-
-    selectedFile = e.dataTransfer.files[0];
-
-    preview();
-
-});
-
-// =========================
-// Preview Image
-// =========================
-
-function preview() {
-
-    if (!selectedFile) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-
-        previewImage.src = e.target.result;
-
-        resultImage.src = "";
-
-    }
-
-    reader.readAsDataURL(selectedFile);
-
-}
-
-// =========================
-// Upscale
-// =========================
-
 upscaleBtn.addEventListener("click", async () => {
 
-    if (!selectedFile){
-
-        alert("Please select an image first.");
-
+    if (!selectedFile) {
+        alert("Pilih gambar terlebih dahulu.");
         return;
-
     }
 
     upscaleBtn.disabled = true;
+    upscaleBtn.innerHTML = "Uploading...";
 
-    upscaleBtn.innerHTML = "Processing...";
+    try {
 
-    const form = new FormData();
+        // Upload ke Cloudinary
+        const uploadData = new FormData();
 
-    form.append("image", selectedFile);
+        uploadData.append("file", selectedFile);
+        uploadData.append("upload_preset", "rinvoid_unsigned");
 
-    form.append("scale", scale.value);
+        const upload = await fetch(
+            "https://api.cloudinary.com/v1_1/rinvoid/image/upload",
+            {
+                method: "POST",
+                body: uploadData
+            }
+        );
 
-    form.append("model", model.value);
+        const uploaded = await upload.json();
 
-    form.append("face", face.checked ? "true":"false");
+        if (!uploaded.secure_url) {
+            throw new Error("Upload Cloudinary gagal");
+        }
 
-    try{
+        upscaleBtn.innerHTML = "Upscaling...";
 
-        const response = await fetch("/api/upscale",{
-
-            method:"POST",
-
-            body:form
-
+        // Kirim URL ke backend Vercel
+        const response = await fetch("/api/upscale", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                imageUrl: uploaded.secure_url,
+                scale: Number(scale.value),
+                model: model.value
+            })
         });
 
         const data = await response.json();
 
-        if(data.success){
-
-            resultImage.src = data.output;
-
-        }else{
-
-            alert(data.error || "Upscale failed.");
-
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Upscale gagal");
         }
 
-    }catch(err){
+        // URL hasil dari Replicate
+        let output = data.result?.output;
 
-        alert("Connection error.");
+        if (Array.isArray(output)) {
+            output = output[0];
+        }
+
+        if (!output) {
+            throw new Error("Tidak ada hasil dari Replicate");
+        }
+
+        resultImage.src = output;
+
+    } catch (err) {
 
         console.error(err);
+        alert(err.message);
 
     }
 
     upscaleBtn.disabled = false;
-
     upscaleBtn.innerHTML = "Upscale Image";
-
-});
-
-// =========================
-// Click Upload Area
-// =========================
-
-dropArea.addEventListener("click",()=>{
-
-    imageInput.click();
-
-});
-
-// =========================
-// Download Result
-// =========================
-
-resultImage.addEventListener("click",()=>{
-
-    if(!resultImage.src) return;
-
-    const a=document.createElement("a");
-
-    a.href=resultImage.src;
-
-    a.download="rinvoid-upscaled.png";
-
-    a.click();
 
 });
