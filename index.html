@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rinvoid Upscaler</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="script.js" defer></script>
+
+</head>
+<body>
+
+<header>
+<div class="logo">
+<h1>Rinvoid <span>Upscaler</span></h1>
+</div>
+
+<nav>
+<a href="#">Home</a>
+<a href="#">Upscaler</a>
+<a href="#">About</a>
+</nav>
+</header>
+
+<section class="hero">
+
+<h2>Upscale buat aron</h2>
+
+<p>
+Enhance image quality instantly using AI technology.
+Upload your photo and upscale it up to 4x.
+</p>
+
+</section>
+
+<section class="container">
+
+<div class="upload-box" id="dropArea">
+
+<input type="file" id="imageInput" hidden accept="image/*">
+
+<div class="upload-content">
+
+<h3>Drop Image Here</h3>
+
+<p>or click to upload</p>
+
+<button id="uploadBtn">
+Choose Image
+</button>
+
+</div>
+
+</div>
+
+<div class="preview">
+
+<div class="card">
+
+<h3>Original</h3>
+
+<img id="previewImage" src="" alt="">
+
+</div>
+
+<div class="card">
+
+<h3>Upscaled</h3>
+
+<img id="resultImage" src="" alt="">
+
+</div>
+
+</div>
+
+<div class="settings">
+
+<h2>Settings</h2>
+
+<label>
+
+Scale
+
+<select id="scale">
+
+<option value="2">2x</option>
+
+<option value="4" selected>4x</option>
+
+<option value="8">8x</option>
+
+</select>
+
+</label>
+
+<label>
+
+Model
+
+<select id="model">
+
+<option value="general">General</option>
+
+<option value="anime">Anime</option>
+
+</select>
+
+</label>
+
+<label class="checkbox">
+
+<input type="checkbox" id="face">
+
+Face Enhance
+
+</label>
+
+<button id="upscaleBtn">
+
+Upscale Image
+
+</button>
+
+</div>
+
+</section>
+
+<footer>
+
+<p>
+
+© 2026 Rinvoid Upscaler
+
+</p>
+
+</footer>
+
+</body>
+</html>
